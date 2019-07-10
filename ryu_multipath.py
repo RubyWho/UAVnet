@@ -52,7 +52,7 @@ class ProjectController(app_manager.RyuApp):
 
     # Get all the paths in the topology
     def get_paths(self, src, dst):
-        #Get all paths from src to dst using the DFS algorithm         
+        #Get all paths from src to dst using the DFS algorithm
         if src == dst:
             # Host target is on the same switch
             return [[src]]
@@ -70,7 +70,7 @@ class ProjectController(app_manager.RyuApp):
 
     # Get the link cost
     def get_link_cost(self, s1, s2):
-        # Get the link cost between any two switches 
+        # Get the link cost between any two switches
         e1 = self.adjacency[s1][s2]
         e2 = self.adjacency[s2][s1]
         bl = min(self.bandwidths[s1][e1], self.bandwidths[s2][e2])
@@ -78,7 +78,7 @@ class ProjectController(app_manager.RyuApp):
         return ew
 
     # Get the path cost
-    def get_path_cost(self, path):        
+    def get_path_cost(self, path):
         cost = 0
         for i in range(len(path) - 1):
             cost += self.get_link_cost(path[i], path[i+1])
@@ -109,7 +109,7 @@ class ProjectController(app_manager.RyuApp):
 
     # Generate a OpenFlow id
     def generate_openflow_gid(self):
-        # Returns a random OpenFlow group id        
+        # Returns a random OpenFlow group id
         n = random.randint(0, 2**32)
         while n in self.group_ids:
             n = random.randint(0, 2**32)
@@ -146,18 +146,18 @@ class ProjectController(app_manager.RyuApp):
 
             for in_port in ports:
                 match_ip = ofp_parser.OFPMatch(
-                    eth_type=0x0800, 
-                    ipv4_src=ip_src, 
+                    eth_type=0x0800,
+                    ipv4_src=ip_src,
                     ipv4_dst=ip_dst
                 )
                 match_arp = ofp_parser.OFPMatch(
-                    eth_type=0x0806, 
-                    arp_spa=ip_src, 
+                    eth_type=0x0806,
+                    arp_spa=ip_src,
                     arp_tpa=ip_dst
                 )
 
-                out_ports = ports[in_port]                
-                
+                out_ports = ports[in_port]
+
                 if len(out_ports) > 1:
                     group_id = None
                     group_new = False
@@ -169,8 +169,8 @@ class ProjectController(app_manager.RyuApp):
                     group_id = self.multipath_group_ids[node, src, dst]
 
                     buckets = []
-                    
-                    # Obtain the bucket weight value
+
+            # Obtain the bucket weight value
 		    for port, weight in out_ports:
                         bucket_weight = int(round((1 - weight/sum_of_pw) * 10))
                         bucket_action = [ofp_parser.OFPActionOutput(port)]
@@ -205,9 +205,9 @@ class ProjectController(app_manager.RyuApp):
 
                     self.add_flow(dp, 32768, match_ip, actions)
                     self.add_flow(dp, 1, match_arp, actions)
-        
+
         # Prints installation time
-        print "Path installation finished in ", time.time() - computation_start 
+        print "Path installation finished in ", time.time() - computation_start
         return paths_with_ports[0][src][1]
 
     # Add flow
@@ -261,7 +261,7 @@ class ProjectController(app_manager.RyuApp):
             return
 
         # Drop the IPV6 Packets
-	if pkt.get_protocol(ipv6.ipv6):  
+	if pkt.get_protocol(ipv6.ipv6):
             match = parser.OFPMatch(eth_type=eth.ethertype)
             actions = []
             self.add_flow(datapath, 1, match, actions)
@@ -292,7 +292,7 @@ class ProjectController(app_manager.RyuApp):
                     h1 = self.hosts[src]
                     h2 = self.hosts[dst_mac]
                     out_port = self.install_paths(h1[0], h1[1], h2[0], h2[1], src_ip, dst_ip)
-                    self.install_paths(h2[0], h2[1], h1[0], h1[1], dst_ip, src_ip) # reverse       
+                    self.install_paths(h2[0], h2[1], h1[0], h1[1], dst_ip, src_ip) # reverse
 
         actions = [parser.OFPActionOutput(out_port)]
 
